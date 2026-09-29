@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-pashto: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-pashto);
+  }
+}
+
+.font-pashto {
+  font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.font-amiri {
+  font-family: 'Amiri', 'Noto Naskh Arabic', serif;
+}
+
+.font-scheherazade {
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
+}
+
+/* Custom scrollbars for clean aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Soft card shadow */
+.card-soft-shadow {
+  box-shadow: 0 4px 20px -2px rgba(107, 70, 193, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+.dark .card-soft-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+}
