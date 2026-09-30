@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { SocialContacts, DEFAULT_CONTACTS } from '../types/poetry';
+import { getLocalContacts } from '../services/apiService';
 import { WhatsAppIcon, FacebookIcon, TikTokIcon } from './AboutModal';
 
 interface ContactModalProps {
@@ -10,13 +11,18 @@ interface ContactModalProps {
 }
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
-  const [contacts, setContacts] = useState<SocialContacts>(DEFAULT_CONTACTS);
+  const [contacts, setContacts] = useState<SocialContacts>(() => getLocalContacts());
 
   // Fetch contacts whenever modal opens
   useEffect(() => {
     if (isOpen) {
       fetch('/api/contacts')
-        .then(res => res.json())
+        .then(res => {
+          if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+            return res.json();
+          }
+          return null;
+        })
         .then(data => {
           if (data && typeof data === 'object') {
             setContacts(prev => ({ ...prev, ...data }));

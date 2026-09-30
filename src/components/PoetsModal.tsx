@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { FAMOUS_POETS } from '../types/poetry';
 import { POET_BIOGRAPHIES, PoetBio } from '../data/poetBios';
+import { submitNewPoet } from '../services/apiService';
 
 interface PoetItem {
   name: string;
@@ -98,22 +99,12 @@ export const PoetsModal: React.FC<PoetsModalProps> = ({
     setIsSubmittingPoet(true);
 
     try {
-      const res = await fetch('/api/poets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newPoetName.trim() })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'د نوي شاعر په اضافه کولو کې ستونزه راغله');
-      }
+      await submitNewPoet(newPoetName.trim());
 
       setAddPoetSuccess(`«${newPoetName.trim()}» په برياليتوب سره اضافه شو!`);
       if (onPoetAdded) {
         onPoetAdded(newPoetName.trim());
       }
-      const added = newPoetName.trim();
       setNewPoetName('');
       setTimeout(() => {
         setIsAddingPoet(false);

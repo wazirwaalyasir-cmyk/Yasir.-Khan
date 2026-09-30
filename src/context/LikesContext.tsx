@@ -46,21 +46,16 @@ export const LikesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         body: JSON.stringify({ action })
       });
 
-      if (!res.ok) {
-        throw new Error('Failed to update like status');
+      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+        const data = await res.json();
+        return { likes: data.likes, isLiked: !currentlyLiked };
       }
-
-      const data = await res.json();
-      return { likes: data.likes, isLiked: !currentlyLiked };
     } catch (err) {
-      // Revert local state on error
-      if (currentlyLiked) {
-        setLikedIds(prev => [...prev, id]);
-      } else {
-        setLikedIds(prev => prev.filter(item => item !== id));
-      }
-      throw err;
+      console.log('Using local likes state');
     }
+
+    // Keep optimistic state when running statically on GitHub Pages
+    return { likes: currentlyLiked ? 0 : 1, isLiked: !currentlyLiked };
   };
 
   return (

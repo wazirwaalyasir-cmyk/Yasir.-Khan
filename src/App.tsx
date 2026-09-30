@@ -15,6 +15,7 @@ import { AboutModal } from './components/AboutModal';
 import { ContactModal } from './components/ContactModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { PoetryItem, PoetryCategory, CATEGORIES } from './types/poetry';
+import { fetchPoetryFeed, fetchCategoryCounts, fetchPoetsList } from './services/apiService';
 import {
   Plus,
   Sparkles,
@@ -84,18 +85,12 @@ function PoetryAppContent() {
   // Fetch Meta (categories, poets)
   const fetchMetadata = async () => {
     try {
-      const [catsRes, poetsRes] = await Promise.all([
-        fetch('/api/categories'),
-        fetch('/api/poets')
+      const [counts, poets] = await Promise.all([
+        fetchCategoryCounts(),
+        fetchPoetsList()
       ]);
-      if (catsRes.ok) {
-        const counts = await catsRes.json();
-        setCategoryCounts(counts);
-      }
-      if (poetsRes.ok) {
-        const poets = await poetsRes.json();
-        setPoetsList(poets);
-      }
+      setCategoryCounts(counts);
+      setPoetsList(poets);
     } catch (e) {
       console.error('Error fetching metadata', e);
     }
@@ -115,11 +110,6 @@ function PoetryAppContent() {
     setError(null);
 
     try {
-      const params = new URLSearchParams();
-      params.append('page', String(pageNum));
-      params.append('limit', '12');
-      params.append('sort', sortBy);
-
       if (showFavoritesOnly) {
         if (favoriteIds.length === 0) {
           setPoetryList([]);
@@ -130,26 +120,19 @@ function PoetryAppContent() {
           setIsLoadingMore(false);
           return;
         }
-        params.append('ids', favoriteIds.join(','));
       }
 
-      if (selectedCategory) {
-        params.append('category', selectedCategory);
-      }
-      if (selectedPoet) {
-        params.append('poet', selectedPoet);
-      }
-      if (searchQuery.trim()) {
-        params.append('search', searchQuery.trim());
-      }
+      const res = await fetchPoetryFeed({
+        page: pageNum,
+        limit: 12,
+        sort: sortBy,
+        category: selectedCategory,
+        poet: selectedPoet,
+        search: searchQuery.trim() || null,
+        ids: showFavoritesOnly ? favoriteIds : undefined
+      });
 
-      const res = await fetch(`/api/poetry?${params.toString()}`);
-      if (!res.ok) {
-        throw new Error('په سرور کې ستونزه رامنځته شوه');
-      }
-
-      const json = await res.json();
-      const newItems: PoetryItem[] = json.data || [];
+      const newItems: PoetryItem[] = res.data || [];
 
       if (isLoadMore) {
         setPoetryList(prev => [...prev, ...newItems]);
@@ -157,8 +140,8 @@ function PoetryAppContent() {
         setPoetryList(newItems);
       }
 
-      setHasNextPage(Boolean(json.pagination?.hasNext));
-      setTotalCount(json.pagination?.total || 0);
+      setHasNextPage(Boolean(res.pagination?.hasNext));
+      setTotalCount(res.pagination?.total || 0);
       setPage(pageNum);
     } catch (err: any) {
       setError(err.message || 'د شاعرۍ په راوستلو کې تېروتنه وشوه');

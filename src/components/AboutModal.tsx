@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, BookOpen, Sparkles, MessageCircle, Share2, Mail, ExternalLink, ShieldCheck } from 'lucide-react';
 import { SocialContacts, DEFAULT_CONTACTS } from '../types/poetry';
+import { getLocalContacts } from '../services/apiService';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -28,12 +29,17 @@ export const TikTokIcon = ({ className = 'w-4 h-4' }: { className?: string }) =>
 );
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, onOpenContact }) => {
-  const [contacts, setContacts] = useState<SocialContacts>(DEFAULT_CONTACTS);
+  const [contacts, setContacts] = useState<SocialContacts>(() => getLocalContacts());
 
   useEffect(() => {
     if (isOpen) {
       fetch('/api/contacts')
-        .then(res => res.json())
+        .then(res => {
+          if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+            return res.json();
+          }
+          return null;
+        })
         .then(data => {
           if (data && typeof data === 'object') {
             setContacts(prev => ({ ...prev, ...data }));

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Send, Eye } from 'lucide-react';
 import { CATEGORIES, FAMOUS_POETS, PoetryCategory, PoetryItem } from '../types/poetry';
+import { submitNewPoetry } from '../services/apiService';
 
 interface AddPoetryModalProps {
   isOpen: boolean;
@@ -44,21 +45,11 @@ export const AddPoetryModal: React.FC<AddPoetryModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/poetry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          poetry_text: poetryText.trim(),
-          poet_name: poetName.trim(), // Can be empty string
-          category
-        })
+      const data = await submitNewPoetry({
+        poetry_text: poetryText.trim(),
+        poet_name: poetName.trim(), // Can be empty string
+        category
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'د شعر په خپرولو کې ستونزه رامنځته شوه');
-      }
 
       // Success
       onPoetryAdded(data.data, data.message || 'شاعري په برياليتوب سره اضافه شوه');
