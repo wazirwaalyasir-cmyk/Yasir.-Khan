@@ -7,9 +7,12 @@ import { defineConfig } from 'vite';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  // Use /Yasir.-Khan/ for GitHub Pages production build, or configurable via VITE_BASE_PATH
+  const base = process.env.VITE_BASE_PATH || (mode === 'production' ? '/Yasir.-Khan/' : '/');
+
   return {
-    base: './',
+    base,
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
